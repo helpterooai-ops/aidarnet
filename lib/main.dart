@@ -1,27 +1,16 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 
-void main() {
-  runZonedGuarded(() async {
-    WidgetsFlutterBinding.ensureInitialized();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint("خطأ في تهيئة فايربيس: $e");
+  }
 
-    FlutterError.onError = (FlutterErrorDetails details) {
-      FlutterError.presentError(details);
-      debugPrint('Flutter Error: ${details.exceptionAsString()}');
-    };
-
-    try {
-      await Firebase.initializeApp();
-    } catch (e, st) {
-      debugPrint("خطأ في تهيئة فايربيس: $e\n$st");
-    }
-
-    runApp(const MyApp());
-  }, (error, stack) {
-    debugPrint('Uncaught zone error: $error\n$stack');
-  });
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -30,23 +19,28 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'الدار نت',
+      title: 'الدار نت | Al-Dar Net',
       debugShowCheckedModeBanner: false,
+
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: child!,
         );
       },
+
       theme: ThemeData(
         useMaterial3: true,
+        fontFamily: 'IBMPlexSansArabic',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1E88E5),
-          primary: const Color(0xFF1E88E5),
+          seedColor: const Color(0xFF1E293B), // أزرق كحلي مطفي فاخر
+          primary: const Color(0xFF0F172A),
+          secondary: const Color(0xFFD97706), // ذهبي مطفي أنيق
         ),
-        scaffoldBackgroundColor: const Color(0xFFF8F9FA),
+        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
       ),
-      home: const HomeScreen(),
+
+      home: const SplashScreen(),
     );
   }
 }

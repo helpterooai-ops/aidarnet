@@ -5,18 +5,21 @@ class CardService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// دالة سحب كرت من الفئة المطلوبة (مثلاً "500", "1000", "2000", "5000")
-  Future<String?> drawCard(String categoryValue) async {
+  /// دالة سحب كرت من الفئة المطلوبة وتسجيل عملية البيع وحساب الربح
+  Future<Map<String, dynamic>?> drawCard({
+    required String categoryValue,
+    required double wholesalePrice,
+    required double customerPaid,
+  }) async {
     try {
       final user = _auth.currentUser;
       if (user == null) {
         throw Exception("يجب تسجيل الدخول أولاً لسحب كرت.");
       }
 
-      // تحديد اسم المجموعة بناءً على الفئة
       final collectionName = 'cards_$categoryValue';
 
-      // البحث عن أول كرت متاح (`available`) في هذه الفئة
+      // 1. البحث عن كرت متاح فقط (available)
       final querySnapshot = await _db
           .collection(collectionName)
           .where('status', '==', 'available')
@@ -24,27 +27,29 @@ class CardService {
           .get();
 
       if (querySnapshot.docs.isEmpty) {
-        return null; // لا توجد كروت متاحة حالياً في هذه الفئة
+        return null; // لا توجد كروت متاحة
       }
 
       final docRef = querySnapshot.docs.first.reference;
       final cardData = querySnapshot.docs.first.data();
-      final cardCode = cardData['card'] as String;
+      final String cardCode = (cardData['card'] ?? cardData['card_number'] ?? cardData['code']) as String;
 
-      // تنفيذ المعاملة (Transaction) لضمان الأمان وتحديث الحالة بدقة
+      final double profit = customerPaid - wholesalePrice;
+
+      // 2. تنفيذ المعاملة الآمنة (Transaction)
       await _db.runTransaction((transaction) async {
         final freshSnapshot = await transaction.get(docRef);
-        
+
         if (!freshSnapshot.exists) {
           throw Exception("الكرت غير موجود.");
         }
-        
+
         final currentStatus = freshSnapshot.data()?['status'];
         if (currentStatus != 'available') {
-          throw Exception("عذراً، تم سحب هذا الكرت للتو من قبل مستخدم آخر. حاول مرة أخرى.");
+          throw Exception("عذراً، تم سحب هذا الكرت للتو من قبل مستخدم آخر.");
         }
 
-        // تحديث الكرت إلى مستخدم وإسناده لرقم/معرف المستخدم الحالي
+        // تحديث الكرت إلى مستخدم
         transaction.update(docRef, {
           'status': 'used',
           'userUid': user.uid,
@@ -52,9 +57,26 @@ class CardService {
           'usedAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
+
+        // إضافة عملية الشراء في سجل المبيعات (sales_history)
+        final salesRef = _db.collection('sales_history').doc();
+        transaction.set(salesRef, {
+          'saleId': salesRef.id,
+          'cardCode': cardCode,
+          'category': categoryValue,
+          'wholesalePrice': wholesalePrice,
+          'customerPaid': customerPaid,
+          'profit': profit,
+          'userUid': user.uid,
+          'userEmail': user.email ?? 'بدون بريد',
+          'timestamp': FieldValue.serverTimestamp(),
+        });
       });
 
-      return cardCode; // إرجاع كود الكرت الناجح ليعرضه التطبيق للمستخدم
+      return {
+        'cardCode': cardCode,
+        'profit': profit,
+      };
     } catch (e) {
       print("خطأ أثناء سحب الكرت: $e");
       rethrow;
