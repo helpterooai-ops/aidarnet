@@ -1,15 +1,15 @@
 {
-  "project_info": {
-    "project_number": "492090345128",
+  "معلومات_المشروع": {
+    "رقم_المشروع": "492090345128"
     "project_id": "al-dar-net",
     "storage_bucket": "al-dar-net.firebasestorage.app"
   },
-  "client": [
+  "عميل": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:492090345128:android:65f08a64c8bd9a2c99e49d",
         "android_client_info": {
-          "package_name": "com.aldar.net"
+          "اسم_الحزمة": "com.aldar.net"
         }
       },
       "oauth_client": [],
@@ -18,7 +18,7 @@
           "current_key": "AIzaSyAgdWATOkAID6sr4mYgodg4w-ZqM7gsL4A"
         }
       ],
-      "services": {
+      "خدمات": {
         "appinvite_service": {
           "other_platform_oauth_client": []
         }

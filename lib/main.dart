@@ -1,17 +1,27 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/home_screen.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  try {
-    await Firebase.initializeApp();
-  } catch (e) {
-    debugPrint("خطأ في تهيئة فايربيس: $e");
-  }
+void main() {
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(const MyApp());
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.presentError(details);
+      debugPrint('Flutter Error: ${details.exceptionAsString()}');
+    };
+
+    try {
+      await Firebase.initializeApp();
+    } catch (e, st) {
+      debugPrint("خطأ في تهيئة فايربيس: $e\n$st");
+    }
+
+    runApp(const MyApp());
+  }, (error, stack) {
+    debugPrint('Uncaught zone error: $error\n$stack');
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -22,14 +32,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'الدار نت',
       debugShowCheckedModeBanner: false,
-      
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: child!,
         );
       },
-
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -38,7 +46,6 @@ class MyApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: const Color(0xFFF8F9FA),
       ),
-
       home: const HomeScreen(),
     );
   }
