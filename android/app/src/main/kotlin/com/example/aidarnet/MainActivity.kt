@@ -1,4 +1,4 @@
-package com.example.aidarnet
+package com.aldar.net
 
 import io.flutter.embedding.android.FlutterActivity
 
