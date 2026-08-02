@@ -19,10 +19,10 @@ class CardService {
 
       final collectionName = 'cards_$categoryValue';
 
-      // 1. البحث عن كرت متاح فقط (available)
+      // 1. البحث عن كرت متاح فقط (available) - تعديل كتابة where الحديثة
       final querySnapshot = await _db
           .collection(collectionName)
-          .where('status', '==', 'available')
+          .where('status', isEqualTo: 'available')
           .limit(1)
           .get();
 
@@ -44,7 +44,10 @@ class CardService {
           throw Exception("الكرت غير موجود.");
         }
 
-        final currentStatus = freshSnapshot.data()?['status'];
+        // تحويل البيانات إلى Map بشكل صريح لإزالة خطأ الـ Object
+        final dataMap = freshSnapshot.data() as Map<String, dynamic>?;
+        final currentStatus = dataMap?['status'];
+
         if (currentStatus != 'available') {
           throw Exception("عذراً، تم سحب هذا الكرت للتو من قبل مستخدم آخر.");
         }

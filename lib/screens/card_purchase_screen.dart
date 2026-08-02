@@ -13,7 +13,6 @@ class CardPurchaseScreen extends StatefulWidget {
 class _CardPurchaseScreenState extends State<CardPurchaseScreen> {
   final CardService _cardService = CardService();
 
-  // فئات الكروت المتاحة
   final List<Map<String, dynamic>> _categories = [
     {'value': '500', 'title': 'فئة 500 ريال', 'wholesalePrice': 450.0},
     {'value': '1000', 'title': 'فئة 1000 ريال', 'wholesalePrice': 900.0},
@@ -23,7 +22,6 @@ class _CardPurchaseScreenState extends State<CardPurchaseScreen> {
 
   void _openPurchaseDialog(Map<String, dynamic> category, int availableCount) {
     if (availableCount <= 0) {
-      // إظهار تنبيه عدم توفر الكروت
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -112,7 +110,6 @@ class _CardPurchaseScreenState extends State<CardPurchaseScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // حقل المبلغ المستلم من الزبون
                   TextField(
                     controller: paidController,
                     keyboardType: TextInputType.number,
@@ -130,7 +127,6 @@ class _CardPurchaseScreenState extends State<CardPurchaseScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // مؤشر الربح والخسارة التفاعلي
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
@@ -162,7 +158,6 @@ class _CardPurchaseScreenState extends State<CardPurchaseScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // زر تاكيد الشراء
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -173,7 +168,7 @@ class _CardPurchaseScreenState extends State<CardPurchaseScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () async {
-                        Navigator.pop(context); // إغلاق النافذة السفلية
+                        Navigator.pop(context);
                         _processCardDraw(category, wholesalePrice, customerPaid);
                       },
                       child: const Text('تأكيد سحب الكرت', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -202,13 +197,12 @@ class _CardPurchaseScreenState extends State<CardPurchaseScreen> {
         customerPaid: customerPaid,
       );
 
-      if (mounted) Navigator.pop(context); // إغلاق التحميل
+      if (mounted) Navigator.pop(context);
 
       if (result != null && mounted) {
         final String cardCode = result['cardCode'];
         final double profit = result['profit'];
 
-        // نافذة نجاح الشراء وعرض الرمز
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -228,9 +222,10 @@ class _CardPurchaseScreenState extends State<CardPurchaseScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.slate.shade100,
+                    // تم التبديل إلى grey.shade100 و grey.shade300
+                    color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.slate.shade300),
+                    border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: SelectableText(
                     cardCode,
@@ -301,7 +296,8 @@ class _CardPurchaseScreenState extends State<CardPurchaseScreen> {
           return StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection(collectionName)
-                .where('status', '==', 'available')
+                // تم التعديل إلى الصيغة الحديثة
+                .where('status', isEqualTo: 'available')
                 .snapshots(),
             builder: (context, snapshot) {
               final int count = snapshot.hasData ? snapshot.data!.docs.length : 0;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package0cloud_firestore/cloud_firestore.dart' if (dart.library.io) 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SalesHistoryScreen extends StatelessWidget {
@@ -19,7 +19,8 @@ class SalesHistoryScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('sales_history')
-            .where('userUid', '==', user?.uid ?? '')
+            // تم التعديل إلى الصيغة الحديثة
+            .where('userUid', isEqualTo: user?.uid ?? '')
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -49,7 +50,6 @@ class SalesHistoryScreen extends StatelessWidget {
 
           return Column(
             children: [
-              // ملخص إجمالي الأرباح
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
@@ -70,7 +70,6 @@ class SalesHistoryScreen extends StatelessWidget {
                 ),
               ),
 
-              // قائمة العمليات
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -110,7 +109,6 @@ class SalesHistoryScreen extends StatelessWidget {
                 ),
               ),
 
-              // زر تحميل وسحب تقرير سجل المبيعات
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SizedBox(

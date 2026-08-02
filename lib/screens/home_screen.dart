@@ -25,7 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // تبديل البطاقة الترويجية كل 4 ثوانٍ
     _bannerTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
       if (mounted) {
         setState(() {
@@ -76,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. البطاقة الإعلانية البارزة (إطار زجاجي فاخر بحواف منحنية)
+            // البطاقة الإعلانية البارزة
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(22),
@@ -146,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
 
-            // 2. شبكة الأقسام الستة (6 مربعات أنيقة)
+            // شبكة الأقسام الستة
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -230,7 +229,8 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.slate.shade200),
+          // تم استبدال Colors.slate بـ Colors.grey.shade200
+          border: Border.all(color: Colors.grey.shade200),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
