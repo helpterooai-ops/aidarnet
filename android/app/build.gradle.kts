@@ -1,10 +1,10 @@
 plugins {
     id("com.android.application")
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
 
 android {
-    // 1. عدل الـ namespace هنا ليطابق فايربيس
     namespace = "com.aldar.net"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -15,7 +15,6 @@ android {
     }
 
     defaultConfig {
-        // 2. عدل الـ applicationId هنا أيضاً ليطابق فايربيس تماماً
         applicationId = "com.aldar.net"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion

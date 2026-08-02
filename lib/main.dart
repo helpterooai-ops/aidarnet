@@ -5,8 +5,11 @@ import 'screens/home_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // تهيئة فايربيس عند فتح التطبيق
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint("خطأ في تهيئة فايربيس: $e");
+  }
 
   runApp(const MyApp());
 }
@@ -20,7 +23,6 @@ class MyApp extends StatelessWidget {
       title: 'الدار نت',
       debugShowCheckedModeBanner: false,
       
-      // ضبط الاتجاه من اليمين إلى اليسار (عربي)
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,
@@ -28,7 +30,6 @@ class MyApp extends StatelessWidget {
         );
       },
 
-      // ضبط الثيم الافتراضي
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
