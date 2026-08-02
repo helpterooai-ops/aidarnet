@@ -109,7 +109,8 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                         border: Border.all(color: Colors.grey.shade200),
                       ),
                       child: ListTile(
-                        padding: const EdgeInsets.all(16),
+                        // ✅ تم التعديل هنا: استخدام contentPadding بدلاً من padding
+                        contentPadding: const EdgeInsets.all(16),
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -124,7 +125,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                           ],
                         ),
                         subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAlignment.start,
                           children: [
                             const SizedBox(height: 6),
                             Text('كود الكرت: $code', style: const TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF0F172A))),
