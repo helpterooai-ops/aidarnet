@@ -5,7 +5,7 @@ class CardService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// دالة سحب كرت من الفئة المطلوبة وتسجيل عملية البيع وحساب الربح
+  /// دالة سحب كرت وتحديث حالته وتسجيل بيانات المستخدم بدقة
   Future<Map<String, dynamic>?> drawCard({
     required String categoryValue,
     required double wholesalePrice,
@@ -17,9 +17,14 @@ class CardService {
         throw Exception("يجب تسجيل الدخول أولاً لسحب كرت.");
       }
 
+      final String userEmail = user.email ?? 'بدون بريد';
+      final String username = userEmail.contains('@') 
+          ? userEmail.split('@').first 
+          : (user.displayName ?? user.uid);
+
       final collectionName = 'cards_$categoryValue';
 
-      // 1. البحث عن كرت متاح فقط (available) - تعديل كتابة where الحديثة
+      // 1. البحث عن كرت متاح فقط (available)
       final querySnapshot = await _db
           .collection(collectionName)
           .where('status', isEqualTo: 'available')
@@ -27,7 +32,7 @@ class CardService {
           .get();
 
       if (querySnapshot.docs.isEmpty) {
-        return null; // لا توجد كروت متاحة
+        return null;
       }
 
       final docRef = querySnapshot.docs.first.reference;
@@ -44,24 +49,21 @@ class CardService {
           throw Exception("الكرت غير موجود.");
         }
 
-        // تحويل البيانات إلى Map بشكل صريح لإزالة خطأ الـ Object
         final dataMap = freshSnapshot.data() as Map<String, dynamic>?;
-        final currentStatus = dataMap?['status'];
-
-        if (currentStatus != 'available') {
+        if (dataMap?['status'] != 'available') {
           throw Exception("عذراً، تم سحب هذا الكرت للتو من قبل مستخدم آخر.");
         }
 
-        // تحديث الكرت إلى مستخدم
+        // تحديث حالة الكرت وربطه باسم المستخدم
         transaction.update(docRef, {
           'status': 'used',
           'userUid': user.uid,
-          'customerNumber': user.email ?? user.uid,
+          'userEmail': userEmail,
+          'username': username,
           'usedAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        // إضافة عملية الشراء في سجل المبيعات (sales_history)
+        // تسجيل العملية في سجل المبيعات لتمكين الاستعادة لاحقاً
         final salesRef = _db.collection('sales_history').doc();
         transaction.set(salesRef, {
           'saleId': salesRef.id,
@@ -71,7 +73,8 @@ class CardService {
           'customerPaid': customerPaid,
           'profit': profit,
           'userUid': user.uid,
-          'userEmail': user.email ?? 'بدون بريد',
+          'userEmail': userEmail,
+          'username': username,
           'timestamp': FieldValue.serverTimestamp(),
         });
       });
@@ -79,9 +82,9 @@ class CardService {
       return {
         'cardCode': cardCode,
         'profit': profit,
+        'username': username,
       };
     } catch (e) {
-      print("خطأ أثناء سحب الكرت: $e");
       rethrow;
     }
   }
