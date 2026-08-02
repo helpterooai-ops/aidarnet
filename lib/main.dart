@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       title: 'الدار نت',
       debugShowCheckedModeBanner: false,
       
-      // ضبط الاتجاه من اليمين للصار (عربي)
+      // ضبط الاتجاه من اليمين إلى اليسار (عربي)
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,
@@ -28,10 +28,9 @@ class MyApp extends StatelessWidget {
         );
       },
 
-      // ضبط الثيم والخط الافتراضي
+      // ضبط الثيم الافتراضي
       theme: ThemeData(
         useMaterial3: true,
-        fontFamily: 'IBMPlexSansArabic',
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF1E88E5),
           primary: const Color(0xFF1E88E5),
