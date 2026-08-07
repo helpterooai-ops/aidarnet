@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// بطاقة الرصيد + معرف الوكيل (ينسخه ويرسله للإدارة)
+  /// بطاقة الرصيد + معرف الوكيل
   Widget _buildBalanceCard(User? user) {
     if (user == null) return const SizedBox.shrink();
     return Container(
@@ -108,7 +108,13 @@ class _HomeScreenState extends State<HomeScreen> {
               StreamBuilder<DocumentSnapshot>(
                 stream: FirebaseFirestore.instance.collection('agents').doc(user.uid).snapshots(),
                 builder: (context, snap) {
-                  final balance = ((snap.data?.data()?['balance'] as num?) ?? 0).toDouble();
+                  // ✅ إصلاح الخطأ: التحقق من وجود البيانات وتحويلها إلى Map
+                  if (!snap.hasData || !snap.data!.exists) {
+                    return const Text('0 ريال', style: TextStyle(color: Color(0xFFF59E0B), fontSize: 22, fontWeight: FontWeight.w900));
+                  }
+                  final data = snap.data!.data() as Map<String, dynamic>?;
+                  final balance = ((data?['balance'] as num?) ?? 0).toDouble();
+                  
                   return Text(
                     '${balance.toStringAsFixed(0)} ريال',
                     style: const TextStyle(color: Color(0xFFF59E0B), fontSize: 22, fontWeight: FontWeight.w900),
