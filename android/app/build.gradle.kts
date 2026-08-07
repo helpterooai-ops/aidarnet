@@ -15,10 +15,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
     defaultConfig {
         applicationId = "com.aldar.net"
         minSdk = 23
@@ -39,12 +35,18 @@ android {
 
     buildTypes {
         release {
-            // يوقّع بالمفتاح الرسمي إذا وجد، وإلا بالمفتاح التجريبي
+            isMinifyEnabled = false
             signingConfig = if (file("release-keystore.jks").exists())
                 signingConfigs.getByName("release")
             else
                 signingConfigs.getByName("debug")
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
