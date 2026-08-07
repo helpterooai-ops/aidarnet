@@ -35,10 +35,9 @@ android {
 
     buildTypes {
         release {
-            // ✅ تفعيل minify و shrink معاً (أو تعطيل shrink فقط)
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // ✅ تم تعطيل minify و shrink لحل مشكلة R8
+            isMinifyEnabled = false
+            isShrinkResources = false
             
             signingConfig = if (file("release-keystore.jks").exists())
                 signingConfigs.getByName("release")
