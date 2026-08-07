@@ -35,7 +35,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // ✅ تفعيل minify و shrink معاً (أو تعطيل shrink فقط)
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            
             signingConfig = if (file("release-keystore.jks").exists())
                 signingConfigs.getByName("release")
             else
