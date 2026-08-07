@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/card_service.dart';
+import '../widgets/custom_snackbar.dart';
 import 'card_purchase_screen.dart';
 import 'sales_history_screen.dart';
 
@@ -18,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   Timer? _carouselTimer;
+  bool _balanceVisible = true;
 
   final List<Map<String, String>> _bannerItems = [
     {'title': 'شبكة الدار نت الفائقة', 'subtitle': 'تغطية واسعة وسرعة عالية في نقل البيانات'},
@@ -84,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// بطاقة الرصيد + معرف الوكيل
+  /// بطاقة الرصيد الحديثة — حقل منحني الأطراف + زرا إظهار/إخفاء + نسخ الـ UID
   Widget _buildBalanceCard(User? user) {
     if (user == null) return const SizedBox.shrink();
     return Container(
@@ -95,8 +97,10 @@ class _HomeScreenState extends State<HomeScreen> {
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 12, offset: const Offset(0, 6))],
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 14, offset: const Offset(0, 8)),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,43 +109,75 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('رصيدك الحالي', style: TextStyle(color: Colors.white70, fontSize: 13)),
-              StreamBuilder<DocumentSnapshot>(
-                stream: FirebaseFirestore.instance.collection('agents').doc(user.uid).snapshots(),
-                builder: (context, snap) {
-                  // ✅ إصلاح الخطأ: التحقق من وجود البيانات وتحويلها إلى Map
-                  if (!snap.hasData || !snap.data!.exists) {
-                    return const Text('0 ريال', style: TextStyle(color: Color(0xFFF59E0B), fontSize: 22, fontWeight: FontWeight.w900));
-                  }
-                  final data = snap.data!.data() as Map<String, dynamic>?;
-                  final balance = ((data?['balance'] as num?) ?? 0).toDouble();
-                  
-                  return Text(
-                    '${balance.toStringAsFixed(0)} ريال',
-                    style: const TextStyle(color: Color(0xFFF59E0B), fontSize: 22, fontWeight: FontWeight.w900),
-                  );
-                },
+              // زرا الإظهار والإخفاء
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: Icon(Icons.visibility_rounded, size: 18,
+                          color: _balanceVisible ? const Color(0xFFF59E0B) : Colors.white38),
+                      onPressed: () => setState(() => _balanceVisible = true),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: Icon(Icons.visibility_off_rounded, size: 18,
+                          color: !_balanceVisible ? const Color(0xFFF59E0B) : Colors.white38),
+                      onPressed: () => setState(() => _balanceVisible = false),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          const Divider(color: Colors.white24, height: 20),
+          const SizedBox(height: 10),
+          // حقل الرصيد منحني الأطراف
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withOpacity(0.12)),
+            ),
+            child: StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance.collection('agents').doc(user.uid).snapshots(),
+              builder: (context, snap) {
+                String text = '0 ريال';
+                if (snap.hasData && snap.data!.exists) {
+                  final data = snap.data!.data() as Map<String, dynamic>?;
+                  final balance = ((data?['balance'] as num?) ?? 0).toDouble();
+                  text = '${balance.toStringAsFixed(0)} ريال';
+                }
+                return Text(
+                  _balanceVisible ? text : '• • • • •',
+                  style: const TextStyle(
+                      color: Color(0xFFF59E0B), fontSize: 24, fontWeight: FontWeight.w900),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 14),
           const Text('معرف الوكيل (أرسله للإدارة لشحن رصيدك):',
               style: TextStyle(color: Colors.white70, fontSize: 11)),
           const SizedBox(height: 6),
           Row(
             children: [
               Expanded(
-                child: SelectableText(
-                  user.uid,
-                  style: const TextStyle(color: Colors.white, fontSize: 12, fontFamily: 'monospace'),
-                ),
+                child: SelectableText(user.uid,
+                    style: const TextStyle(color: Colors.white, fontSize: 12, fontFamily: 'monospace')),
               ),
               IconButton(
                 icon: const Icon(Icons.copy_rounded, color: Color(0xFFF59E0B), size: 20),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: user.uid));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تم نسخ المعرف — أرسله للإدارة'), behavior: SnackBarBehavior.floating),
-                  );
+                  CustomSnackBar.success(context, 'تم نسخ المعرف — أرسله للإدارة');
                 },
               ),
             ],
@@ -171,7 +207,8 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(item['title']!, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
+                Text(item['title']!,
+                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
                 const SizedBox(height: 6),
                 Text(item['subtitle']!, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
               ],
@@ -213,7 +250,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
+                    Text(title,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
                     const SizedBox(height: 4),
                     Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade600, height: 1.3)),
                   ],
