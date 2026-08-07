@@ -1,0 +1,307 @@
+/* ==========================================================
+   لوحة الدار نت — تصميم هادئ وفاخر
+   ========================================================== */
+:root {
+  --primary: #0F172A;
+  --accent: #D97706;
+  --bg-page: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --text-main: #1E293B;
+  --text-muted: #64748B;
+  --border-color: #E2E8F0;
+  --success: #10B981;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --shadow-main: 0 4px 20px rgba(15, 23, 42, 0.06);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  min-height: 100vh;
+}
+
+.hidden { display: none !important; }
+
+/* ---------- الهيدر ---------- */
+.app-header {
+  background: var(--primary);
+  color: #fff;
+  padding: 14px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.25);
+}
+.header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-icon { font-size: 1.6rem; }
+.brand h1 { font-size: 1.15rem; font-weight: 800; }
+.brand p { font-size: 0.75rem; color: #CBD5E1; }
+.user-area { display: flex; align-items: center; gap: 10px; }
+.user-email { font-size: 0.8rem; color: #CBD5E1; direction: ltr; }
+
+/* ---------- الأزرار ---------- */
+.btn {
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover:not(:disabled) { filter: brightness(1.08); }
+.btn-secondary { background: #EEF2F7; color: var(--text-main); }
+.btn-secondary:hover { background: #E2E8F0; }
+.btn-ghost { background: transparent; color: #fff; border: 1px solid #475569; }
+.btn-ghost:hover { background: #1E293B; }
+.btn-block { width: 100%; }
+
+/* ---------- تسجيل الدخول ---------- */
+.auth-section {
+  display: flex;
+  justify-content: center;
+  padding: 60px 16px;
+}
+.auth-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-main);
+  padding: 32px;
+  width: 100%;
+  max-width: 380px;
+}
+.auth-card h2 { font-size: 1.2rem; margin-bottom: 20px; text-align: center; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #FBFCFE;
+  transition: border 0.2s;
+}
+.form-input:focus { outline: none; border-color: var(--accent); }
+
+/* ---------- المحتوى ---------- */
+.dashboard-content { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+
+/* ---------- العدادات ---------- */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.metric-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+  box-shadow: var(--shadow-main);
+}
+.metric-header { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 6px; }
+.metric-value { font-size: 2rem; font-weight: 800; color: var(--primary); }
+.metric-subtext { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+/* ---------- لوحة الرفع ---------- */
+.upload-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-main);
+}
+.panel-header h3 { font-size: 1.1rem; margin-bottom: 4px; }
+.panel-header p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+
+.categories-accordion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.category-item-wrapper { grid-column: span 1; }
+.category-item-wrapper.active { grid-column: 1 / -1; }
+
+.category-box {
+  background: #FBFCFE;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.category-box:hover { border-color: var(--accent); }
+.category-item-wrapper.active .category-box {
+  border-color: var(--accent);
+  background: #FFFBEB;
+}
+.box-checkbox {
+  width: 26px; height: 26px;
+  margin: 0 auto 8px;
+  border-radius: 8px;
+  background: #EEF2F7;
+  color: transparent;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800;
+}
+.category-item-wrapper.active .box-checkbox { background: var(--accent); color: #fff; }
+.category-box h4 { font-size: 1.05rem; margin-bottom: 4px; }
+.category-box span { font-size: 0.78rem; color: var(--text-muted); }
+
+.category-inline-form {
+  margin-top: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  background: #FBFCFE;
+}
+.selected-category-banner {
+  font-size: 0.9rem;
+  background: #EEF2F7;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* ---------- منطقة اختيار الملفات ---------- */
+.file-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 2px dashed #CBD5E1;
+  border-radius: var(--radius-md);
+  padding: 26px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+.file-drop:hover { border-color: var(--accent); background: #FFFBEB; }
+.file-drop-icon { font-size: 2rem; }
+.file-drop-title { font-weight: 700; font-size: 0.95rem; }
+.file-drop-hint { font-size: 0.75rem; color: var(--text-muted); }
+.file-input { display: none; }
+
+/* ---------- التقدم والسجل ---------- */
+.upload-progress-container {
+  height: 8px;
+  background: #EEF2F7;
+  border-radius: 99px;
+  margin-top: 14px;
+  overflow: hidden;
+}
+.upload-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+.progress-text { font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px; }
+.upload-log-box {
+  margin-top: 10px;
+  max-height: 120px;
+  overflow-y: auto;
+  background: #0F172A;
+  color: #A7F3D0;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 0.72rem;
+  direction: ltr;
+  text-align: left;
+}
+.upload-log-box:empty { display: none; }
+
+/* ---------- التقرير ---------- */
+.report-panel { margin-top: 14px; }
+.report-summary { display: flex; gap: 10px; flex-wrap: wrap; }
+.report-item {
+  flex: 1;
+  min-width: 100px;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  font-size: 0.8rem;
+}
+.report-item strong { display: block; font-size: 1.2rem; margin-top: 4px; }
+.report-item.success { background: #ECFDF5; color: #065F46; }
+.report-item.warning { background: #FFFBEB; color: #92400E; }
+.report-item.danger  { background: #FEF2F2; color: #991B1B; }
+
+.codes-preview {
+  margin-top: 10px;
+  max-height: 140px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+.codes-preview:empty { display: none; }
+.code-chip {
+  background: #EEF2F7;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  direction: ltr;
+}
+
+/* ---------- شريط الأزرار ---------- */
+.action-bar {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}
+
+/* ---------- التوست ---------- */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary);
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px 22px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.35);
+  z-index: 999;
+  animation: toastIn 0.25s ease;
+}
+.toast.success { background: var(--success); }
+.toast.warning { background: var(--warning); }
+.toast.danger  { background: var(--danger); }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }

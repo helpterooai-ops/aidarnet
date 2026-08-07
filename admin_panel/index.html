@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الدار نت | لوحة الإدارة</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- محرك OCR لاستخراج الأرقام من الصور -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
+  <!-- محرك PDF لتحويل صفحات PDF إلى صور -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ===================== الهيدر ===================== -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">📶</span>
+        <div>
+          <h1>الدار نت</h1>
+          <p>لوحة إدارة الكروت</p>
+        </div>
+      </div>
+      <div class="user-area">
+        <span id="user-email" class="user-email">--</span>
+        <button id="btn-logout" class="btn btn-ghost hidden">خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== تسجيل الدخول ===================== -->
+  <section id="auth-section" class="auth-section">
+    <form id="login-form" class="auth-card">
+      <h2>تسجيل دخول المدير</h2>
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="login-email" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="login-password" class="form-input" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">دخول</button>
+    </form>
+  </section>
+
+  <!-- ===================== لوحة التحكم ===================== -->
+  <section id="dashboard-section" class="dashboard-content hidden">
+
+    <!-- العدادات اللحظية -->
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-header">فئة 500</div>
+        <div class="metric-value" id="count-category-500">0</div>
+        <div class="metric-subtext">كرت متاح</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-header">فئة 1000</div>
+        <div class="metric-value" id="count-category-1000">0</div>
+        <div class="metric-subtext">كرت متاح</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-header">فئة 2000</div>
+        <div class="metric-value" id="count-category-2000">0</div>
+        <div class="metric-subtext">كرت متاح</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-header">فئة 5000</div>
+        <div class="metric-value" id="count-category-5000">0</div>
+        <div class="metric-subtext">كرت متاح</div>
+      </div>
+    </section>
+
+    <!-- لوحة التغذية بالملفات -->
+    <section class="upload-panel">
+      <div class="panel-header">
+        <h3>تغذية الكروت حسب الفئة</h3>
+        <p>ارفع ملف PDF أو صورة (JPG / PNG) وسيتم استخراج رمز الدخول من كل كرت تلقائياً.</p>
+      </div>
+
+      <div class="categories-accordion-grid">
+
+        <!-- فئة 500 -->
+        <div class="category-item-wrapper" data-category="500">
+          <div class="category-box">
+            <div class="box-checkbox">✓</div>
+            <h4>فئة 500</h4>
+            <span>اضغط للتفعيل ورفع الملفات</span>
+          </div>
+          <div class="category-inline-form hidden">
+            <div class="selected-category-banner">إضافة كروت جديدة إلى: <strong>فئة 500</strong></div>
+
+            <label class="file-drop">
+              <input type="file" class="file-input" accept="application/pdf,image/png,image/jpeg" multiple>
+              <span class="file-drop-icon">📄</span>
+              <span class="file-drop-title">اضغط لاختيار PDF أو JPG أو PNG</span>
+              <span class="file-drop-hint">يمكن اختيار أكثر من ملف دفعة واحدة</span>
+            </label>
+
+            <div class="upload-progress-container hidden"><div class="upload-progress-bar"></div></div>
+            <span class="progress-text upload-progress-text"></span>
+            <div class="upload-log-box"></div>
+
+            <div class="report-panel hidden">
+              <div class="report-summary">
+                <div class="report-item success"><span>الكروت المستخرجة:</span> <strong class="report-valid-count">0</strong></div>
+                <div class="report-item warning"><span>المكررة:</span> <strong class="report-duplicate-count">0</strong></div>
+                <div class="report-item danger"><span>غير صالحة:</span> <strong class="report-invalid-count">0</strong></div>
+              </div>
+              <div class="codes-preview"></div>
+            </div>
+
+            <div class="action-bar">
+              <button type="button" class="btn btn-secondary btn-reset">تصفير</button>
+              <button type="button" class="btn btn-success btn-upload" disabled>
+                رفع الكروت (<span class="valid-count-badge">0</span>)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- فئة 1000 -->
+        <div class="category-item-wrapper" data-category="1000">
+          <div class="category-box">
+            <div class="box-checkbox">✓</div>
+            <h4>فئة 1000</h4>
+            <span>اضغط للتفعيل ورفع الملفات</span>
+          </div>
+          <div class="category-inline-form hidden">
+            <div class="selected-category-banner">إضافة كروت جديدة إلى: <strong>فئة 1000</strong></div>
+
+            <label class="file-drop">
+              <input type="file" class="file-input" accept="application/pdf,image/png,image/jpeg" multiple>
+              <span class="file-drop-icon">📄</span>
+              <span class="file-drop-title">اضغط لاختيار PDF أو JPG أو PNG</span>
+              <span class="file-drop-hint">يمكن اختيار أكثر من ملف دفعة واحدة</span>
+            </label>
+
+            <div class="upload-progress-container hidden"><div class="upload-progress-bar"></div></div>
+            <span class="progress-text upload-progress-text"></span>
+            <div class="upload-log-box"></div>
+
+            <div class="report-panel hidden">
+              <div class="report-summary">
+                <div class="report-item success"><span>الكروت المستخرجة:</span> <strong class="report-valid-count">0</strong></div>
+                <div class="report-item warning"><span>المكررة:</span> <strong class="report-duplicate-count">0</strong></div>
+                <div class="report-item danger"><span>غير صالحة:</span> <strong class="report-invalid-count">0</strong></div>
+              </div>
+              <div class="codes-preview"></div>
+            </div>
+
+            <div class="action-bar">
+              <button type="button" class="btn btn-secondary btn-reset">تصفير</button>
+              <button type="button" class="btn btn-success btn-upload" disabled>
+                رفع الكروت (<span class="valid-count-badge">0</span>)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- فئة 2000 -->
+        <div class="category-item-wrapper" data-category="2000">
+          <div class="category-box">
+            <div class="box-checkbox">✓</div>
+            <h4>فئة 2000</h4>
+            <span>اضغط للتفعيل ورفع الملفات</span>
+          </div>
+          <div class="category-inline-form hidden">
+            <div class="selected-category-banner">إضافة كروت جديدة إلى: <strong>فئة 2000</strong></div>
+
+            <label class="file-drop">
+              <input type="file" class="file-input" accept="application/pdf,image/png,image/jpeg" multiple>
+              <span class="file-drop-icon">📄</span>
+              <span class="file-drop-title">اضغط لاختيار PDF أو JPG أو PNG</span>
+              <span class="file-drop-hint">يمكن اختيار أكثر من ملف دفعة واحدة</span>
+            </label>
+
+            <div class="upload-progress-container hidden"><div class="upload-progress-bar"></div></div>
+            <span class="progress-text upload-progress-text"></span>
+            <div class="upload-log-box"></div>
+
+            <div class="report-panel hidden">
+              <div class="report-summary">
+                <div class="report-item success"><span>الكروت المستخرجة:</span> <strong class="report-valid-count">0</strong></div>
+                <div class="report-item warning"><span>المكررة:</span> <strong class="report-duplicate-count">0</strong></div>
+                <div class="report-item danger"><span>غير صالحة:</span> <strong class="report-invalid-count">0</strong></div>
+              </div>
+              <div class="codes-preview"></div>
+            </div>
+
+            <div class="action-bar">
+              <button type="button" class="btn btn-secondary btn-reset">تصفير</button>
+              <button type="button" class="btn btn-success btn-upload" disabled>
+                رفع الكروت (<span class="valid-count-badge">0</span>)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- فئة 5000 -->
+        <div class="category-item-wrapper" data-category="5000">
+          <div class="category-box">
+            <div class="box-checkbox">✓</div>
+            <h4>فئة 5000</h4>
+            <span>اضغط للتفعيل ورفع الملفات</span>
+          </div>
+          <div class="category-inline-form hidden">
+            <div class="selected-category-banner">إضافة كروت جديدة إلى: <strong>فئة 5000</strong></div>
+
+            <label class="file-drop">
+              <input type="file" class="file-input" accept="application/pdf,image/png,image/jpeg" multiple>
+              <span class="file-drop-icon">📄</span>
+              <span class="file-drop-title">اضغط لاختيار PDF أو JPG أو PNG</span>
+              <span class="file-drop-hint">يمكن اختيار أكثر من ملف دفعة واحدة</span>
+            </label>
+
+            <div class="upload-progress-container hidden"><div class="upload-progress-bar"></div></div>
+            <span class="progress-text upload-progress-text"></span>
+            <div class="upload-log-box"></div>
+
+            <div class="report-panel hidden">
+              <div class="report-summary">
+                <div class="report-item success"><span>الكروت المستخرجة:</span> <strong class="report-valid-count">0</strong></div>
+                <div class="report-item warning"><span>المكررة:</span> <strong class="report-duplicate-count">0</strong></div>
+                <div class="report-item danger"><span>غير صالحة:</span> <strong class="report-invalid-count">0</strong></div>
+              </div>
+              <div class="codes-preview"></div>
+            </div>
+
+            <div class="action-bar">
+              <button type="button" class="btn btn-secondary btn-reset">تصفير</button>
+              <button type="button" class="btn btn-success btn-upload" disabled>
+                رفع الكروت (<span class="valid-count-badge">0</span>)
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </section>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
