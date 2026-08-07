@@ -21,6 +21,37 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _carouselTimer;
   bool _balanceVisible = true;
 
+  // ✅ الرصيد يُحسب من الكروت المتاحة فعلياً في قاعدة البيانات
+  final Map<String, int> _availableCounts = {'500': 0, '1000': 0, '2000': 0, '5000': 0};
+  static const Map<String, double> _wholesalePrices = {
+    '500': 450,
+    '1000': 900,
+    '2000': 1800,
+    '5000': 4500,
+  };
+  final List<StreamSubscription> _subs = [];
+
+  /// إجمالي الرصيد = مجموع (عدد المتاحة × سعر الجملة) لكل فئة
+  double get _totalBalance => _availableCounts.entries.fold(
+      0.0, (sum, e) => sum + (e.value * (_wholesalePrices[e.key] ?? 0)));
+
+  void _listenToInventory() {
+    _availableCounts.keys.forEach((cat) {
+      final sub = FirebaseFirestore.instance
+          .collection('cards_$cat')
+          .where('status', isEqualTo: 'available')
+          .snapshots()
+          .listen((snap) {
+        if (mounted) {
+          setState(() {
+            _availableCounts[cat] = snap.size;
+          });
+        }
+      });
+      _subs.add(sub);
+    });
+  }
+
   final List<Map<String, String>> _bannerItems = [
     {'title': 'شبكة الدار نت الفائقة', 'subtitle': 'تغطية واسعة وسرعة عالية في نقل البيانات'},
     {'title': 'سحب وتوزيع آمن', 'subtitle': 'توليد وشراء الكروت بنظام الحماية المباشر'},
@@ -31,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _cardService.ensureAgentAccount();
+    _listenToInventory();
     _carouselTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
       if (mounted) {
         _currentPage = (_currentPage + 1) % _bannerItems.length;
@@ -44,6 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _carouselTimer?.cancel();
     _pageController.dispose();
+    for (var s in _subs) {
+      s.cancel();
+    }
     super.dispose();
   }
 
@@ -86,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// بطاقة الرصيد الحديثة — حقل منحني الأطراف + زرا إظهار/إخفاء + نسخ الـ UID
+  /// بطاقة الرصيد — تُحسب لحظياً من الكروت المتاحة
   Widget _buildBalanceCard(User? user) {
     if (user == null) return const SizedBox.shrink();
     return Container(
@@ -109,7 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('رصيدك الحالي', style: TextStyle(color: Colors.white70, fontSize: 13)),
-              // زرا الإظهار والإخفاء
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 decoration: BoxDecoration(
@@ -137,7 +171,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 10),
-          // حقل الرصيد منحني الأطراف
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -146,25 +179,18 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Colors.white.withOpacity(0.12)),
             ),
-            child: StreamBuilder<DocumentSnapshot>(
-              stream: FirebaseFirestore.instance.collection('agents').doc(user.uid).snapshots(),
-              builder: (context, snap) {
-                String text = '0 ريال';
-                if (snap.hasData && snap.data!.exists) {
-                  final data = snap.data!.data() as Map<String, dynamic>?;
-                  final balance = ((data?['balance'] as num?) ?? 0).toDouble();
-                  text = '${balance.toStringAsFixed(0)} ريال';
-                }
-                return Text(
-                  _balanceVisible ? text : '• • • • •',
-                  style: const TextStyle(
-                      color: Color(0xFFF59E0B), fontSize: 24, fontWeight: FontWeight.w900),
-                );
-              },
+            child: Text(
+              _balanceVisible ? '${_totalBalance.toStringAsFixed(0)} ريال' : '• • • • •',
+              style: const TextStyle(color: Color(0xFFF59E0B), fontSize: 24, fontWeight: FontWeight.w900),
             ),
           ),
+          const SizedBox(height: 8),
+          Text(
+            'متاح حالياً: ${_availableCounts['500']}×500 | ${_availableCounts['1000']}×1000 | ${_availableCounts['2000']}×2000 | ${_availableCounts['5000']}×5000',
+            style: const TextStyle(color: Colors.white54, fontSize: 10),
+          ),
           const SizedBox(height: 14),
-          const Text('معرف الوكيل (أرسله للإدارة لشحن رصيدك):',
+          const Text('معرف الوكيل (أرسله للإدارة):',
               style: TextStyle(color: Colors.white70, fontSize: 11)),
           const SizedBox(height: 6),
           Row(
