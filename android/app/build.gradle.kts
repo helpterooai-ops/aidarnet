@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
 }
@@ -14,24 +15,36 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17.toString()
+    }
+
     defaultConfig {
         applicationId = "com.aldar.net"
-        minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
-    buildTypes {
-        release {
-            signingConfig = signingConfigs.getByName("debug")
+    // ===== التوقيع الرسمي الموحد =====
+    signingConfigs {
+        create("release") {
+            storeFile = file("release-keystore.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "aldar2024"
+            keyAlias = System.getenv("KEY_ALIAS") ?: "aldar"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: "aldar2024"
         }
     }
-}
 
-kotlin {
-    compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    buildTypes {
+        release {
+            // يوقّع بالمفتاح الرسمي إذا وجد، وإلا بالمفتاح التجريبي
+            signingConfig = if (file("release-keystore.jks").exists())
+                signingConfigs.getByName("release")
+            else
+                signingConfigs.getByName("debug")
+        }
     }
 }
 

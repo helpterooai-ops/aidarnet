@@ -1,44 +1,40 @@
-name: Build AidarNet Release APK
+name: Build Flutter APK
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:
+    branches: [ main ]
 
 jobs:
   build:
-    name: Build Flutter APK (AidarNet)
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'gradle'
+          distribution: temurin
+          java-version: 17
 
-      - name: Set up Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
-          cache: true
+          channel: stable
 
-      - name: Install Dependencies
-        run: flutter pub get
+      - name: Decode Keystore
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/release-keystore.jks
+            echo "Keystore ready"
+          else
+            echo "No keystore secret - will use debug signing"
+          fi
 
-      - name: Build Release APK
+      - name: Build APK
         run: flutter build apk --release
 
-      - name: Upload Release APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AidarNet-Release-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 7
-
+          name: app-release
+          path: build/app/outputs/**/app-release.apk
