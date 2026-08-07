@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-run: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -24,10 +24,17 @@ jobs:
       - name: Decode Keystore
         run: |
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/release-keystore.jks
-            echo "Keystore ready"
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\n\r ' | base64 -d -i > android/app/release-keystore.jks
+            echo "Keystore decoded"
+            ls -la android/app/release-keystore.jks
           else
             echo "No keystore secret - will use debug signing"
+          fi
+
+      - name: Verify Keystore
+        run: |
+          if [ -f android/app/release-keystore.jks ]; then
+            keytool -list -keystore android/app/release-keystore.jks -storepass aldar2024 -alias aldar
           fi
 
       - name: Build APK
