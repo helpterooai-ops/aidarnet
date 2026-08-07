@@ -21,14 +21,19 @@ jobs:
         with:
           channel: stable
 
-      - name: Decode Keystore
+      - name: Prepare Keystore
         run: |
-          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\n\r ' | base64 -d -i > android/app/release-keystore.jks
-            echo "Keystore decoded"
-            ls -la android/app/release-keystore.jks
+          if [ -f android/app/release-keystore.jks ]; then
+            echo "Keystore found in repository"
+          elif [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            B64=$(echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -cd 'A-Za-z0-9+/=')
+            MOD=$(( ${#B64} % 4 ))
+            if [ "$MOD" -eq 2 ]; then B64="${B64}=="; fi
+            if [ "$MOD" -eq 3 ]; then B64="${B64}="; fi
+            echo "$B64" | base64 -d > android/app/release-keystore.jks
+            echo "Keystore decoded from secret (self-healed)"
           else
-            echo "No keystore secret - will use debug signing"
+            echo "No keystore - debug signing will be used"
           fi
 
       - name: Verify Keystore
